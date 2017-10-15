@@ -29,12 +29,13 @@
     </section>
     <section>
         <h1>signup</h1>
-        <form name="signUp" action="" method="post">
+        <form name="signUp" action="/signup" method="post">
             <div>
                 <label for="">email address
             <input type="text" name="email" value="">
 
             </label>
+                <span class="error" name="email_error"></span>
             </div>
 
             <div>
@@ -42,6 +43,8 @@
             <input type="password" name="password" value="">
 
             </label>
+                <span class="error" name="password_error"></span>
+
             </div>
 
             <div>
@@ -49,6 +52,8 @@
             <input type="password" name="password_confirmation" value="">
 
             </label>
+                <span class="error" name="password_confirmation_error"></span>
+
             </div>
 
 
@@ -61,6 +66,9 @@
 
         <input type="submit" name="" value="Please reset your password">
     </form>-->
+    <script src="./jquery.min.js">
+    </script>
+    <script src="./main.js"></script>
 
 </body>
 
