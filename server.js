@@ -26,25 +26,24 @@ var server = http.createServer(function(request, response) {
         getPostData(request, function(postData) {
 
             // console.log('拿到的数据')
-            let email = postData.email;
-            let password = postData.password
-            let password_confirmation = postData.password_confirmation
-                //等价于let {email,password,password_confirmation} = postData
-                //check email
-            let errors = {}
-            if (email.indexOf('@') <= 0) {
-                console.log('here')
-                console.log(email) //bhjsaf%40jksl
-                    // console.log(decodeURIComponent(email))
-                errors.email = 'email is illegal'
-            }
-            if (password.length < 6) {
-                errors.password = 'password is too short'
-            }
-            if (password_confirmation !== password) {
-                errors.password_confirmation = 'the password does not match with the password confirmation'
-            }
 
+            let errors = checkPostData(postData)
+            if (Object.keys(errors).length === 0) {
+                //写数据库
+                let { email, password } = postData
+                let user = {
+                    email: email,
+                    passwordHash: frankHash(password) // 永远不要使用md5和自己发明的加密算法
+
+                }
+                let dbString = fs.readFileSync('./db.json', 'utf8') //string
+                let dbObject = JSON.parse(dbString) //string=>object
+                dbObject.users.push(user)
+                let dbString2 = JSON.stringify(dbObject) //object => string
+                fs.writeFileSync('./db.json', dbString2, { encoding: 'utf-8' })
+            } else {
+                response.statusCode = 400
+            }
             // console.log(email, password, password_confirmation)
             response.setHeader('Content-Type', 'text/html;charset=utf-8')
             response.end(JSON.stringify(errors))
@@ -60,6 +59,10 @@ var server = http.createServer(function(request, response) {
     } else if (path === "/main.js") {
         var string = fs.readFileSync('./main.js')
         response.setHeader('Content-Type', 'application/javascript;charset=utf-8')
+        response.end(string)
+    } else if (path === "/home") {
+        var string = fs.readFileSync('./home')
+        response.setHeader('Content-Type', 'text/html;charset=utf-8')
         response.end(string)
     } else {
         response.statusCode = 404
@@ -81,7 +84,7 @@ function getPostData(request, callback) {
         let array = data.split('&')
         let postData = {}
         for (var i = 0; i < array.length; i++) {
-            // console.log(array[i])
+            console.log(array[i])
             let parts = array[i].split('=')
             let key = decodeURIComponent(parts[0])
             let value = decodeURIComponent(parts[1])
@@ -95,6 +98,36 @@ function getPostData(request, callback) {
     })
 }
 
+
+
+
+function checkPostData(postData) {
+    let email = postData.email;
+    let password = postData.password
+    let password_confirmation = postData.password_confirmation
+        //等价于let {email,password,password_confirmation} = postData
+        //check email
+    let errors = {}
+    if (email.indexOf('@') <= 0) {
+        console.log('here')
+        console.log(email) //bhjsaf%40jksl
+            // console.log(decodeURIComponent(email))
+        errors.email = 'email is illegal'
+    }
+    if (password.length < 6) {
+        errors.password = 'password is too short'
+    }
+    if (password_confirmation !== password) {
+        errors.password_confirmation = 'the password does not match with the password confirmation'
+    }
+    return errors
+}
+
+
+
+function frankHash(string) {
+    return 'frank' + string + 'frank'
+}
 
 server.listen(port)
 console.log('监听 ' + port + ' 成功，请用在空中转体720度然后用电饭煲打开 http://localhost:' + port)
