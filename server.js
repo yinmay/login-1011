@@ -64,6 +64,31 @@ var server = http.createServer(function(request, response) {
         var string = fs.readFileSync('./home')
         response.setHeader('Content-Type', 'text/html;charset=utf-8')
         response.end(string)
+    } else if (path === "/login" && method === 'POST') {
+        //读数据库
+        getPostData(request, (postData) => {
+            let dbString = fs.readFileSync('./db.json', 'utf8') //string
+            let dbObject = JSON.parse(dbString) //string=>object
+            let users = dbObject.users
+
+            let { email, password } = postData
+            let found
+            console.log(email, password)
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].email === email && users[i].passwordHash === frankHash(password)) {
+                    found = users[i]
+                    break
+                }
+            }
+            if (found) {
+                response.setHeader('Set-Cookie', { logined: true })
+            }
+
+            var string = fs.readFileSync('./home')
+            response.setHeader('Content-Type', 'text/html;charset=utf-8')
+            response.end('h')
+        })
+
     } else {
         response.statusCode = 404
         response.setHeader('Content-Type', 'text/html;charset=utf-8')
