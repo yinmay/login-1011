@@ -1,28 +1,23 @@
 let $loginForm = $('form[name = login]')
 $loginForm.on('submit', (e) => {
     e.preventDefault()
-    let string = $signUpForm.serialize()
+    let string = $loginForm.serialize()
         // if (Object.keys(errors).length !== 0) {
         //     showErrors($signUpForm, errors)
 
     // } else {
     $.ajax({
-            url: $signUpForm.attr('action'),
-            method: $signUpForm.attr('method'),
+            url: $loginForm.attr('action'),
+            method: $loginForm.attr('method'),
             data: string,
             success: function(response) {
-                console.log(response)
-                console.log(typeof response)
-                    // let object = JSON.parse(response)
-                    //将字符串变成对象,在浏览器上运行
 
-                // let errors = JSON.parse(response)
                 location.href = '/home'
             },
             error: function(xhr) {
                 // debugger
-                let errors = JSON.parse(xhr.responseText)
-                showErrors($signUpForm, errors)
+                // let errors = JSON.parse(xhr.responseText)
+                // showErrors($signUpForm, errors)
             }
         })
         // }
@@ -102,24 +97,4 @@ function showErrors($signUpForm, errors) {
         let value = errors[key]
         $signUpForm.find(`[name = ${key}_error]`).text(value)
     }
-}
-
-function parseCookies(cookie) {
-    return cookie.split(';').reduce(
-        function(prev, curr) {
-            var m = / *([^=]+)=(.*)/.exec(curr)
-            var key = m[i]
-            var value = decodeURIComponent(m[2])
-            prev[key] = value
-            return prev
-        }, {}
-    )
-}
-
-function stringifyCookies(cookies) {
-    var list = []
-    for (var key in cookies) {
-        list.push(key + '=' + encodeURIComponent(cookies[key]))
-    }
-    return list.join(';')
 }

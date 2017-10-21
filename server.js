@@ -60,10 +60,6 @@ var server = http.createServer(function(request, response) {
         var string = fs.readFileSync('./main.js')
         response.setHeader('Content-Type', 'application/javascript;charset=utf-8')
         response.end(string)
-    } else if (path === "/home") {
-        var string = fs.readFileSync('./home')
-        response.setHeader('Content-Type', 'text/html;charset=utf-8')
-        response.end(string)
     } else if (path === "/login" && method === 'POST') {
         //读数据库
         getPostData(request, (postData) => {
@@ -80,14 +76,27 @@ var server = http.createServer(function(request, response) {
                     break
                 }
             }
+            console.log(found)
             if (found) {
-                response.setHeader('Set-Cookie', { logined: true })
+                response.setHeader('Set-Cookie', ['logined=true; expires=1000; path=/;"', 'user_id="' + email + '; expires=123456789; path=/;"'])
             }
 
             var string = fs.readFileSync('./home')
             response.setHeader('Content-Type', 'text/html;charset=utf-8')
             response.end('h')
         })
+
+    } else if (path === "/home") {
+        var cookies = parseCookies(request.headers.cookies)
+        console.log(cookies)
+        response.setHeader('Content-Type', 'text/html;charset=utf-8')
+
+        if (cookies.logined == 'true') {
+            response.end(`${cookies.user_id}logedin`)
+        } else {
+            var string = fs.readFileSync('./home')
+            response.end(string)
+        }
 
     } else {
         response.statusCode = 404
@@ -152,6 +161,31 @@ function checkPostData(postData) {
 
 function frankHash(string) {
     return 'frank' + string + 'frank'
+}
+
+function parseCookies(cookie) {
+    try {
+        return cookie.split(';').reduce(
+            function(prev, curr) {
+                var m = / *([^=]+)=(.*)/.exec(curr)
+                var key = m[1]
+                var value = decodeURIComponent(m[2])
+                prev[key] = value
+                return prev
+            }, {}
+        )
+    } catch (error) {
+        return {}
+    }
+
+}
+
+function stringifyCookies(cookies) {
+    var list = []
+    for (var key in cookies) {
+        list.push(key + '=' + encodeURIComponent(cookies[key]))
+    }
+    return list.join('; ')
 }
 
 server.listen(port)
